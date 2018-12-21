@@ -1,0 +1,57 @@
+buildscript {
+	ext {
+		springBootVersion = '1.5.19.BUILD-SNAPSHOT'
+	}
+	repositories {
+		mavenCentral()
+		maven { url "https://repo.spring.io/snapshot" }
+		maven { url "https://repo.spring.io/milestone" }
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+
+group = 'com.scarlatti'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+	maven { url "https://repo.spring.io/snapshot" }
+	maven { url "https://repo.spring.io/milestone" }
+}
+
+ext['springCloudVersion'] = 'Edgware.BUILD-SNAPSHOT'
+
+dependencies {
+	implementation('org.springframework.boot:spring-boot-starter-batch')
+	implementation('org.springframework.boot:spring-boot-starter-jdbc')
+	implementation('org.springframework.boot:spring-boot-starter-web')
+	implementation group: 'org.hibernate.javax.persistence', name: 'hibernate-jpa-2.1-api', version: '1.0.0.Final'
+	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.8.1'
+//	implementation('org.springframework.cloud:spring-cloud-starter-task')
+	runtimeOnly('com.h2database:h2')
+	testImplementation('org.springframework.boot:spring-boot-starter-test')
+	testImplementation('org.springframework.batch:spring-batch-test')
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+task h2ConsoleWithoutConfiguration(type: Exec) {
+	group = 'application'
+	description = "run the H2 web console for this application's database"
+	configurations.runtimeOnly.canBeResolved = true
+	def h2Jar = configurations.runtimeOnly.files.findResult { it.name.startsWith("h2") ? it : null }
+	commandLine 'java', '-jar', h2Jar,
+			'-url', 'jdbc:h2:file:./build/datasource;AUTO_SERVER=true',
+			'-user', 'sa'
+}

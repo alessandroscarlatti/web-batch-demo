@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:h2:file:./build/datasource;AUTO_SERVER=true
+    username: sa
+    password:
+  batch:
+    initializer:
+      enabled: false
+    job:
+      enabled: false
+    tablePrefix: PGS_
